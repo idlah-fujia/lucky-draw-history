@@ -1,0 +1,20 @@
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        {% for key, label in fields %}
+        <th scope="col">{{ label }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for key, label in fields %}
+        <td data-label="{{ label }}">{{ row[key] or "—" }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

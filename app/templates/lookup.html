@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="panel">
+  <p class="eyebrow">Staff lookup</p>
+  <h1>Lucky Draw History</h1>
+  <p class="lede">Check wins from Reno Fiesta and IDLah. Use the homeowner’s number or the interior designer’s number.</p>
+  <form method="post" action="/lookup" class="stack">
+    <label for="phone">Phone number</label>
+    <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="32" placeholder="8-digit number" value="{{ phone or '' }}" required>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <button type="submit">Show wins</button>
+  </form>
+</section>
+<p class="quiet-link"><a href="/admin/login">Admin</a></p>
+{% endblock %}

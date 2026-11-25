@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Admin</p>
+      <h1>Lucky Draw History</h1>
+      <p class="meta">Last updated {{ updated }}</p>
+    </div>
+    <div class="actions">
+      <form method="post" action="/admin/refresh">
+        <button type="submit">Refresh now</button>
+      </form>
+      <form method="post" action="/admin/logout">
+        <button type="submit" class="secondary">Log out</button>
+      </form>
+    </div>
+  </div>
+  {% if last_error %}
+    <p class="error" role="alert">The last refresh failed ({{ last_error }}). The list below is the last successful pull.</p>
+  {% endif %}
+  {% if not loaded %}
+    <p class="callout">Winner history is not loaded yet.</p>
+  {% elif total == 0 %}
+    <p class="callout">No winner rows are loaded. Add the encrypted history files and Supabase credentials, then refresh.</p>
+  {% else %}
+    <p class="count">{{ total }} wins across {{ events|length }} events. Showing {{ rows|length }}.</p>
+    <form method="get" action="/admin" class="filters">
+      <div>
+        <label for="q">Search</label>
+        <input id="q" name="q" type="search" value="{{ query }}" placeholder="Event, firm, number, name, or prize">
+      </div>
+      <div>
+        <label for="event">Event</label>
+        <select id="event" name="event">
+          <option value="" {% if not event %}selected{% endif %}>All events</option>
+          {% for name, count in events %}
+          <option value="{{ name }}" {% if event == name %}selected{% endif %}>{{ name }} ({{ count }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="secondary">Apply</button>
+    </form>
+    {% if rows %}
+      {% include "table.html" %}
+    {% else %}
+      <p class="callout">No rows match this search.</p>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

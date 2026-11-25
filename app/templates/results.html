@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Your number</p>
+      <h1>Lucky draw wins</h1>
+      <p class="meta">Checked {{ number }}</p>
+    </div>
+    <form method="post" action="/lookup/clear">
+      <button type="submit" class="secondary">Change number</button>
+    </form>
+  </div>
+  {% if notice %}
+    <p class="callout" role="status">{{ notice }}</p>
+  {% else %}
+    <form method="get" action="/results" class="stack search">
+      <label for="q">Search these wins</label>
+      <div class="row-controls">
+        <input id="q" name="q" type="search" value="{{ query }}" placeholder="Firm, name, or prize">
+        <button type="submit" class="secondary">Search</button>
+      </div>
+    </form>
+    {% if filtered_empty %}
+      <p class="callout" role="status">No matching wins in this list.</p>
+    {% else %}
+      <p class="count">{{ rows|length }} win{{ '' if rows|length == 1 else 's' }}</p>
+      {% include "table.html" %}
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}
