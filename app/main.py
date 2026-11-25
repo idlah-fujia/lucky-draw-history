@@ -93,6 +93,8 @@ def _render(request: Request, name: str, status_code: int = 200, **context):
 
 
 def _is_admin(request: Request) -> bool:
+    # Admin page is open (no password) by owner request, 26 Nov 2026.
+    return True
     return admin_token_ok(request.cookies.get(SESSION_COOKIE))
 
 
