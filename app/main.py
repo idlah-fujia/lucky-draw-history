@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 BASE = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
 
-NO_MATCH = "No lucky draw records found for this number."
+NO_MATCH = "No lucky draw records found for this designer number."
+SEALED = "Sealed records: this number belongs to a homeowner. Only designer (ID) numbers can be checked here."
 INVALID_NUMBER = "Enter an 8-digit phone number. Spaces, dashes, and a leading +65 are fine."
 LOOKUP_LIMIT = "Too many lookups. Wait a minute and try again."
 LOGIN_LIMIT = "Too many sign-in attempts. Wait a minute and try again."
@@ -127,7 +128,7 @@ def _filter_rows(rows: list[dict[str, str]], *, phone: str | None, query: str, e
     chosen: list[dict[str, str]] = []
     for row in rows:
         if phone is not None:
-            numbers = phone_tokens(row.get("id_number", "")) | phone_tokens(row.get("homeowner_number", ""))
+            numbers = phone_tokens(row.get("id_number", ""))
             if phone not in numbers:
                 continue
         if event and _event_label(row) != event:
@@ -136,6 +137,18 @@ def _filter_rows(rows: list[dict[str, str]], *, phone: str | None, query: str, e
             continue
         chosen.append({key: row.get(key, "") for key, _label in FIELDS})
     return chosen
+
+
+def _is_homeowner_only(number: str) -> bool:
+    rows, _updated, _err, _loaded = store.snapshot()
+    designer = homeowner = False
+    for row in rows:
+        if number in phone_tokens(row.get("id_number", "")):
+            designer = True
+            break
+        if number in phone_tokens(row.get("homeowner_number", "")):
+            homeowner = True
+    return homeowner and not designer
 
 
 @app.get("/healthz")
@@ -165,6 +178,8 @@ def lookup(request: Request, phone: str = Form("")):
     number = normalize_phone(phone)
     if number is None:
         return _render(request, "lookup.html", status_code=400, title="Lucky Draw History", error=INVALID_NUMBER, phone=phone)
+    if _is_homeowner_only(number):
+        return _render(request, "lookup.html", status_code=403, title="Sealed records", error=SEALED, phone="")
     response = RedirectResponse("/results", status_code=303)
     _set_cookie(response, request, PHONE_COOKIE, issue_phone_token(number))
     return response
