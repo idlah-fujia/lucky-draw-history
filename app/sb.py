@@ -12,6 +12,23 @@ import json
 import os
 import urllib.error
 import urllib.request
+from pathlib import Path
+
+_ENC_KEY_FILE = Path(__file__).resolve().parent.parent / "data" / "supabase_key.enc.b64.txt"
+
+
+def _service_key() -> str:
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    if key:
+        return key
+    data_key = os.environ.get("DATA_KEY", "").strip()
+    if not data_key or not _ENC_KEY_FILE.exists():
+        return ""
+    from app.crypto_util import decrypt_file
+    try:
+        return decrypt_file(_ENC_KEY_FILE, data_key).decode("utf-8").strip()
+    except Exception:
+        return ""
 
 
 class SupabaseError(Exception):
@@ -22,7 +39,7 @@ class SupabaseError(Exception):
 
 def get(path: str, rng: str | None = None):
     base = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    key = _service_key()
     if not base or not key:
         raise SupabaseError("supabase is not configured")
     headers = {"apikey": key, "Authorization": "Bearer " + key}
