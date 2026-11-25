@@ -42,7 +42,7 @@ With Supabase credentials set, live Renocode rows still load. Without those cred
 DATA_KEY="base64-32-byte-key" python tools/encrypt_file.py plain.csv data/pre_renocode.csv.enc.b64.txt
 ```
 
-Designer constants use the same format. The JSON object has three maps: `VERIFIED_TYPO_CANONICAL`, `WHATSAPP_KNOWN_NUMBERS`, and `FIRM_ALIASES`. Until that file is added, the maps are empty.
+Designer constants use the same format. The JSON object has `VERIFIED_TYPO_CANONICAL` and `WHATSAPP_KNOWN_NUMBERS` (keys are `Firm|designer name`) and `FORM_SPOUSE_MATCH_TO_EXISTING` (form row number to source, event code, firm, and phone). Until that file is added, the maps are empty.
 
 ## Tests
 
